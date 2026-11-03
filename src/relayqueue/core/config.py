@@ -1,4 +1,3 @@
-
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -7,12 +6,11 @@ from sqlalchemy import URL
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-    env_file=".env",
-    env_file_encoding="utf-8",
-    env_prefix="RELAYQUEUE_",
-    extra="ignore",
-)
-
+        env_file=".env",
+        env_file_encoding="utf-8",
+        env_prefix="RELAYQUEUE_",
+        extra="ignore",
+    )
 
     db_host: str = "localhost"
     db_port: int = 5432

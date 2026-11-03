@@ -1,6 +1,6 @@
-
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
     CheckConstraint,
@@ -12,6 +12,9 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from relayqueue.database.base import Base
+
+if TYPE_CHECKING:
+    from relayqueue.models.job_attempt import JobAttempt
 
 
 class Worker(Base):

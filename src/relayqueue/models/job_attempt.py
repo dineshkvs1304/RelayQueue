@@ -1,14 +1,14 @@
-
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
+    JSON,
     CheckConstraint,
     DateTime,
     ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Text,
     UniqueConstraint,
@@ -18,6 +18,10 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from relayqueue.database.base import Base
+
+if TYPE_CHECKING:
+    from relayqueue.models.job import Job
+    from relayqueue.models.worker import Worker
 
 
 class JobAttempt(Base):

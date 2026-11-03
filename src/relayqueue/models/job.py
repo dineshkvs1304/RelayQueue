@@ -1,13 +1,14 @@
-
 import uuid
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from sqlalchemy import (
+    JSON,
     CheckConstraint,
     DateTime,
+    ForeignKey,
     Index,
     Integer,
-    JSON,
     String,
     Uuid,
     func,
@@ -16,13 +17,19 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from relayqueue.database.base import Base
 
+if TYPE_CHECKING:
+    from relayqueue.models.job_attempt import JobAttempt
+
 
 class Job(Base):
     __tablename__ = "jobs"
 
     __table_args__ = (
         CheckConstraint(
-            "status IN ('pending', 'running', 'completed', 'retrying', 'failed', 'dead_letter')",
+            "status IN ("
+            "'pending', 'running', 'completed', 'retrying', "
+            "'failed', 'dead_letter', 'cancelled'"
+            ")",
             name="ck_jobs_status",
         ),
         CheckConstraint(
@@ -30,10 +37,20 @@ class Job(Base):
             name="ck_jobs_attempt_limits",
         ),
         Index(
+            "uq_jobs_idempotency_key",
+            "idempotency_key",
+            unique=True,
+        ),
+        Index(
             "ix_jobs_status_available_priority",
             "status",
             "available_at",
             "priority",
+        ),
+        Index(
+            "ix_jobs_status_lease_expiry",
+            "status",
+            "lease_expires_at",
         ),
     )
 
@@ -43,15 +60,17 @@ class Job(Base):
         default=uuid.uuid4,
     )
 
-    task_type: Mapped[str] = mapped_column(
-        String(100),
-        nullable=False,
-    )
+    task_type: Mapped[str] = mapped_column(String(100), nullable=False)
 
     payload: Mapped[dict] = mapped_column(
         JSON,
         nullable=False,
         default=dict,
+    )
+
+    idempotency_key: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True,
     )
 
     status: Mapped[str] = mapped_column(
@@ -95,6 +114,17 @@ class Job(Base):
         nullable=False,
         server_default=func.now(),
         onupdate=func.now(),
+    )
+
+    locked_by: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("workers.id", ondelete="SET NULL"),
+        nullable=True,
+    )
+
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
     )
 
     execution_attempts: Mapped[list["JobAttempt"]] = relationship(
