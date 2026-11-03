@@ -1,4 +1,3 @@
-
 from logging.config import fileConfig
 
 from alembic import context
@@ -15,9 +14,7 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 settings = get_settings()
-database_url = settings.database_url.render_as_string(
-    hide_password=False
-)
+database_url = settings.database_url.render_as_string(hide_password=False)
 
 config.set_main_option(
     "sqlalchemy.url",

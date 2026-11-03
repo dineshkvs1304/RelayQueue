@@ -1,12 +1,8 @@
-
 from concurrent.futures import ThreadPoolExecutor
 from threading import Barrier
 
-from sqlalchemy import select
-
 from relayqueue.database.connection import SessionLocal
 from relayqueue.models.job import Job
-from relayqueue.models.worker import Worker
 from relayqueue.services.worker_registry_service import register_worker
 from relayqueue.services.worker_service import (
     claim_next_job,
@@ -100,24 +96,16 @@ def main():
         print("Recorded owner:", attempt.worker_id)
         print("Status:", job.status)
 
-        successful_claims.append(
-            (worker_id, job.id, attempt.id, attempt.worker_id)
-        )
+        successful_claims.append((worker_id, job.id, attempt.id, attempt.worker_id))
 
     # Validate that both workers claimed different jobs.
-    assert len(successful_claims) == 2, (
-        "Expected both workers to claim a job"
-    )
+    assert len(successful_claims) == 2, "Expected both workers to claim a job"
 
     claimed_job_ids = [claim[1] for claim in successful_claims]
-    assert len(set(claimed_job_ids)) == 2, (
-        "Duplicate job claim detected"
-    )
+    assert len(set(claimed_job_ids)) == 2, "Duplicate job claim detected"
 
     for worker_id, job_id, attempt_id, recorded_owner in successful_claims:
-        assert worker_id == recorded_owner, (
-            "Attempt worker ownership does not match claimant"
-        )
+        assert worker_id == recorded_owner, "Attempt worker ownership does not match claimant"
 
     # Complete both test jobs to leave the database clean.
     for worker_id, job_id, attempt_id, _ in successful_claims:

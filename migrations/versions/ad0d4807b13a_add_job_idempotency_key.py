@@ -1,4 +1,3 @@
-
 """add job idempotency key
 
 Revision ID: ad0d4807b13a
@@ -6,17 +5,16 @@ Revises: 97653e2723d9
 Create Date: 2026-11-03 15:22:21.479321
 """
 
-from typing import Sequence, Union
+from collections.abc import Sequence
 
-from alembic import op
 import sqlalchemy as sa
-
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "ad0d4807b13a"
-down_revision: Union[str, Sequence[str], None] = "97653e2723d9"
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: str | Sequence[str] | None = "97653e2723d9"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
@@ -24,9 +22,7 @@ def upgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
 
-    columns = {
-        column["name"] for column in inspector.get_columns("jobs")
-    }
+    columns = {column["name"] for column in inspector.get_columns("jobs")}
 
     if "idempotency_key" not in columns:
         op.add_column(
@@ -35,9 +31,7 @@ def upgrade() -> None:
         )
 
     inspector = sa.inspect(bind)
-    indexes = {
-        index["name"] for index in inspector.get_indexes("jobs")
-    }
+    indexes = {index["name"] for index in inspector.get_indexes("jobs")}
 
     if "uq_jobs_idempotency_key" not in indexes:
         op.create_index(
@@ -53,17 +47,13 @@ def downgrade() -> None:
     bind = op.get_bind()
     inspector = sa.inspect(bind)
 
-    indexes = {
-        index["name"] for index in inspector.get_indexes("jobs")
-    }
+    indexes = {index["name"] for index in inspector.get_indexes("jobs")}
 
     if "uq_jobs_idempotency_key" in indexes:
         op.drop_index("uq_jobs_idempotency_key", table_name="jobs")
 
     inspector = sa.inspect(bind)
-    columns = {
-        column["name"] for column in inspector.get_columns("jobs")
-    }
+    columns = {column["name"] for column in inspector.get_columns("jobs")}
 
     if "idempotency_key" in columns:
         op.drop_column("jobs", "idempotency_key")

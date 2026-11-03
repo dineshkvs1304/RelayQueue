@@ -1,4 +1,3 @@
-
 import psycopg
 from psycopg.errors import DuplicateDatabase
 
@@ -20,9 +19,7 @@ def main() -> None:
     try:
         with connection.cursor() as cursor:
             try:
-                cursor.execute(
-                    'CREATE DATABASE "relayqueue_test"'
-                )
+                cursor.execute('CREATE DATABASE "relayqueue_test"')
                 print("SUCCESS: relayqueue_test database created.")
 
             except DuplicateDatabase:

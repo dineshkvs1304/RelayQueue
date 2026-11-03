@@ -5,17 +5,14 @@ Revises: 311484e97ef6
 Create Date: 2026-11-02 17:01:11.156264
 
 """
-from typing import Sequence, Union
 
-from alembic import op
-import sqlalchemy as sa
-
+from collections.abc import Sequence
 
 # revision identifiers, used by Alembic.
-revision: str = '4b28d830ccbc'
-down_revision: Union[str, Sequence[str], None] = '311484e97ef6'
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+revision: str = "4b28d830ccbc"
+down_revision: str | Sequence[str] | None = "311484e97ef6"
+branch_labels: str | Sequence[str] | None = None
+depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
