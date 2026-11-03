@@ -32,12 +32,12 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
-    env:
+        env:
       RELAYQUEUE_DB_HOST: localhost
-      RELAYQUEUE_DB_PORT: 5432
+      RELAYQUEUE_DB_PORT: "5432"
       RELAYQUEUE_DB_USER: postgres
       RELAYQUEUE_DB_PASSWORD: postgres
-      RELAYQUEUE_DB_NAME: relayqueue_test
+      RELAYQUEUE_DB_NAME: relayqueue_testtest
 
     steps:
       - name: Checkout repository
@@ -69,6 +69,10 @@ jobs:
       - name: Verify database migrations
         run: |
           alembic check
+
+                - name: Verify database configuration
+        run: |
+          python -c "import os; print('DB password configured:', bool(os.getenv('RELAYQUEUE_DB_PASSWORD')))"
 
       - name: Run tests
         run: |
