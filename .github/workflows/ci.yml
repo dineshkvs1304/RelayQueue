@@ -46,6 +46,12 @@ jobs:
 
       - name: Run tests
         env:
-          RELAYQUEUE_DATABASE_URL: postgresql+psycopg://postgres:postgres@localhost:5432/relayqueue_test
+           RELAYQUEUE_DB_HOST: localhost
+           RELAYQUEUE_DB_PORT: 5432
+           RELAYQUEUE_DB_USER: postgres
+           RELAYQUEUE_DB_PASS: Dinesh@13
+           RELAYQUEUE_DB_NAME: relayqueue_test
+
         run: |
+       
           pytest
