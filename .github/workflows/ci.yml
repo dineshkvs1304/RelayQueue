@@ -3,12 +3,18 @@ name: RelayQueue CI
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - main
+      - master
+
   pull_request:
-    branches: [main, master]
+    branches:
+      - main
+      - master
 
 jobs:
   test:
+    name: Code Quality and Tests
     runs-on: ubuntu-latest
 
     services:
@@ -26,6 +32,13 @@ jobs:
           --health-timeout 5s
           --health-retries 5
 
+    env:
+      RELAYQUEUE_DB_HOST: localhost
+      RELAYQUEUE_DB_PORT: 5432
+      RELAYQUEUE_DB_USER: postgres
+      RELAYQUEUE_DB_PASSWORD: postgres
+      RELAYQUEUE_DB_NAME: relayqueue_test
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,24 +47,29 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
 
+      - name: Check code formatting
+        run: |
+          ruff format --check src tests
+
       - name: Run Ruff
         run: |
           ruff check src tests
 
-      - name: Run tests
-        env:
-           RELAYQUEUE_DB_HOST: localhost
-           RELAYQUEUE_DB_PORT: 5432
-           RELAYQUEUE_DB_USER: postgres
-           RELAYQUEUE_DB_PASS: Dinesh@13
-           RELAYQUEUE_DB_NAME: relayqueue_test
-
+      - name: Apply database migrations
         run: |
-       
+          alembic upgrade head
+
+      - name: Verify database migrations
+        run: |
+          alembic check
+
+      - name: Run tests
+        run: |
           pytest
